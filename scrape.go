@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 )
@@ -21,7 +22,18 @@ func main() {
 
 	c := colly.NewCollector(
 		colly.AllowedDomains("quotes.toscrape.com"),
+		colly.UserAgent("makescraper/1.0 (+https://github.com/Joshkaki00/makescraper)"),
 	)
+	c.IgnoreRobotsTxt = false
+	c.SetRequestTimeout(30 * time.Second)
+
+	if err := c.Limit(&colly.LimitRule{
+		DomainGlob:  "*quotes.toscrape.com*",
+		Parallelism: 2,
+		RandomDelay: 1 * time.Second,
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 	// Target container: .quote — fires once per quote block on the page.
 	c.OnHTML(".quote", func(e *colly.HTMLElement) {
@@ -40,6 +52,10 @@ func main() {
 
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL)
+	})
+
+	c.OnError(func(r *colly.Response, err error) {
+		log.Printf("request to %s failed (status %d): %v", r.Request.URL, r.StatusCode, err)
 	})
 
 	if err := c.Visit("https://quotes.toscrape.com/"); err != nil {
