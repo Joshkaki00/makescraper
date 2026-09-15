@@ -44,8 +44,6 @@ The target site, rate limits, and timeout are set directly in `scrape.go`:
 - `c.SetRequestTimeout(30 * time.Second)` bounds how long a single request can hang
 - `c.IgnoreRobotsTxt = false` respects the site's robots.txt
 
-etiquette rules this project follows.
-
 ## License
 
 No license file yet. Add one before treating this as reusable outside the
